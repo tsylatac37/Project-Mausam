@@ -1,0 +1,17 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+env/
+
+# API Credentials (CRITICAL - DO NOT REMOVE)
+config.py
+
+# Local Data (Prevents your local testing CSV from cluttering the repo)
+data/weather_history.csv
+
+# IDE Settings
+.vscode/
+.idea/
