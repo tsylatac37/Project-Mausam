@@ -1,0 +1,2 @@
+>> Always "git pull origin main" before editing your files
+>>Make a separate branch if you feel like the code is not ready for pushing yet
