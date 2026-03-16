@@ -1,4 +1,74 @@
->> Always "git pull origin main" before editing your files
->> Make a separate branch if you feel like the code is not ready for pushing yet
->> To save this repo "git clone https://github.com/tsylatac37/Weather-Telemetry-System.git"
->> You might need to download GitHub package(or the GitHub desktop app) for smooth workflow
+Before you start contributing, please ensure your environment is set up. We use the GitHub CLI (gh) to make authentication and PR management easier.
+1. Installation
+🪟 Windows
+
+    Git: Download and install Git for Windows. This includes Git Bash, which is recommended for running commands.
+
+    GitHub CLI: Run the following command in PowerShell:
+    PowerShell
+
+    winget install --id GitHub.cli
+
+    Alternatively, download the .msi from cli.github.com.
+
+🍎 MacOS
+
+    Homebrew: If you don't have it, install it at brew.sh.
+
+    Install Git & GH: Open your terminal and run:
+    Bash
+
+    brew install git gh
+
+🐧 Linux (Debian/Ubuntu)
+
+    Git:
+    Bash
+
+    sudo apt update && sudo apt install git -y
+
+    GitHub CLI:
+    Bash
+
+    sudo apt update && sudo apt install gh -y
+
+2. Authentication
+
+Once installed, everyone needs to login to GitHub via the terminal:
+Bash
+
+gh auth login
+
+Follow the prompts: Select GitHub.com > HTTPS > Yes to authenticate with your browser.
+3. Project Workflow
+
+To keep the Weather-Telemetry-System repository clean and avoid merge conflicts, please follow these steps:
+Initial Setup
+
+Clone the repository to your local machine:
+Bash
+
+git clone https://github.com/tsylatac37/Weather-Telemetry-System.git
+cd Weather-Telemetry-System
+
+Daily Workflow
+
+    Stay Updated: Always pull the latest changes before you start typing a single line of code.
+    Bash
+
+    git pull origin main
+
+    Feature Branching: If your code isn't "production-ready" or you're testing a new sensor module, do not work on main. Create a branch:
+    Bash
+
+    git checkout -b feature/your-feature-name
+
+    Saving Work:
+    Bash
+
+    git add .
+    short-description-of-changes"
+    git push origin feature/your-feature-name
+
+    [!TIP]
+    Pro Tip: Use gh pr create after pushing your branch to quickly open a Pull Request for the team to review
