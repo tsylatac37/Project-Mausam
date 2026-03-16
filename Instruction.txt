@@ -1,2 +1,4 @@
 >> Always "git pull origin main" before editing your files
->>Make a separate branch if you feel like the code is not ready for pushing yet
+>> Make a separate branch if you feel like the code is not ready for pushing yet
+>> To save this repo "git clone https://github.com/tsylatac37/Weather-Telemetry-System.git"
+>> You might need to download GitHub package(or the GitHub desktop app) for smooth workflow
