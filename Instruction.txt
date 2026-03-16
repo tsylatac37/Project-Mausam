@@ -1,48 +1,30 @@
-Before you start contributing, please ensure your environment is set up. We use the GitHub CLI (gh) to make authentication and PR management easier.
+Git and GitHub CLI Setup Guide
 1. Installation
-🪟 Windows
+Windows
 
-    Git: Download and install Git for Windows. This includes Git Bash, which is recommended for running commands.
+    Git: Download from git-scm.com.
 
-    GitHub CLI: Run the following command in PowerShell:
-    PowerShell
+    GitHub CLI: Run in PowerShell: winget install --id GitHub.cli
 
-    winget install --id GitHub.cli
+MacOS
 
-    Alternatively, download the .msi from cli.github.com.
+    Git & GH: Run in Terminal: brew install git gh
 
-🍎 MacOS
+Linux (Debian/Ubuntu)
 
-    Homebrew: If you don't have it, install it at brew.sh.
+    Git: sudo apt update && sudo apt install git -y
 
-    Install Git & GH: Open your terminal and run:
-    Bash
-
-    brew install git gh
-
-🐧 Linux (Debian/Ubuntu)
-
-    Git:
-    Bash
-
-    sudo apt update && sudo apt install git -y
-
-    GitHub CLI:
-    Bash
-
-    sudo apt update && sudo apt install gh -y
+    GitHub CLI: sudo apt update && sudo apt install gh -y
 
 2. Authentication
 
-Once installed, everyone needs to login to GitHub via the terminal:
+Log in to your GitHub account via the terminal:
 Bash
 
 gh auth login
 
-Follow the prompts: Select GitHub.com > HTTPS > Yes to authenticate with your browser.
-3. Project Workflow
-
-To keep the Weather-Telemetry-System repository clean and avoid merge conflicts, please follow these steps:
+Select GitHub.com > HTTPS > Login with a web browser.
+Project Workflow Commands
 Initial Setup
 
 Clone the repository to your local machine:
@@ -51,24 +33,55 @@ Bash
 git clone https://github.com/tsylatac37/Weather-Telemetry-System.git
 cd Weather-Telemetry-System
 
-Daily Workflow
+Daily Development Cycle
+Step 1: Update your local code
 
-    Stay Updated: Always pull the latest changes before you start typing a single line of code.
-    Bash
+Always run this before you start working to avoid conflicts.
+Bash
 
-    git pull origin main
+git pull origin main
 
-    Feature Branching: If your code isn't "production-ready" or you're testing a new sensor module, do not work on main. Create a branch:
-    Bash
+Step 2: Create a branch
 
-    git checkout -b feature/your-feature-name
+Do not work directly on the main branch. Create a new branch for your specific task.
+Bash
 
-    Saving Work:
-    Bash
+git checkout -b branch-name
 
-    git add .
-    short-description-of-changes"
-    git push origin feature/your-feature-name
+Step 3: Save and Stage changes
 
-    [!TIP]
-    Pro Tip: Use gh pr create after pushing your branch to quickly open a Pull Request for the team to review
+After editing files, stage them for a commit.
+Bash
+
+git add .
+
+Step 4: Commit changes
+
+Provide a short, descriptive message of what you changed.
+Bash
+
+git commit -m "Description of changes"
+
+Step 5: Push to GitHub
+
+Upload your branch to the remote repository.
+Bash
+
+git push origin branch-name
+
+Step 6: Create a Pull Request (PR)
+
+Once pushed, use the GitHub CLI to notify the team for review.
+Bash
+
+gh pr create --title "Brief title" --body "Detailed description of work"
+
+Useful Management Commands
+
+    Check status: git status (See which files are modified)
+
+    Switch branches: git checkout branch-name
+
+    List branches: git branch
+
+    Discard local changes: git restore <file-name>
