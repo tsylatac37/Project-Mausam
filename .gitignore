@@ -1,17 +1,25 @@
-# Python bytecode
-__pycache__/
-*.py[cod]
-
-# Virtual Environment
+# --- Virtual Environments ---
+.venv/
 venv/
 env/
 
-# API Credentials (CRITICAL - DO NOT REMOVE)
-config.py
+# --- Python Artifacts ---
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Local Data (Prevents your local testing CSV from cluttering the repo)
-data/weather_history.csv
-
-# IDE Settings
+# --- Editor Junk (Vim & Others) ---
+*.swp
+*.swo
 .vscode/
 .idea/
+.DS_Store
+
+# --- Project Data & Logs ---
+# It's safer to ignore all CSVs and Logs globally
+*.csv
+*.log
+
+# --- Security ---
+config.py
+.env
