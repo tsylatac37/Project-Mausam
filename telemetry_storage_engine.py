@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any
 
-# Configure terminal logging (Your "Status LEDs")
+# Configure terminal logging (This is basically the status bar)
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 class TelemetryStorageEngine:
@@ -15,7 +15,7 @@ class TelemetryStorageEngine:
         self.storage_path = Path(storage_dir)
         self.file_path = self.storage_path / filename
         
-        # The Pinout Diagram (Column Headers)
+        # Column Headers
         self.schema = [
             "timestamp", "location_id", "temp_c", 
             "humidity_pct", "wind_kph", "condition"
@@ -29,7 +29,7 @@ class TelemetryStorageEngine:
         
         if not self.file_path.exists():
             with open(self.file_path, mode='w', newline='', encoding='utf-8') as f:
-                # Initialize the 'Canvas' and write the headers
+                # Initialize the file and write the headers
                 writer = csv.DictWriter(f, fieldnames=self.schema, restval="NaN")
                 writer.writeheader()
             logging.info(f"Initialized new telemetry log at: {self.file_path}")
@@ -38,7 +38,7 @@ class TelemetryStorageEngine:
         """The 'Live Feed' routine: Appends one row of data."""
         if "timestamp" not in telemetry_data:
             telemetry_data["timestamp"] = datetime.now().isoformat()
-
+                # Appending the file created previously
         try:
             with open(self.file_path, mode='a', newline='', encoding='utf-8') as f:
                 # The Noise Filter: Ignore extra API junk
