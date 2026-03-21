@@ -8,58 +8,52 @@ import requests
 from datetime import datetime
 from typing import Dict, List
 import logging
-from telemetry_storage_engine import TelemetryStorageEngine
 import pandas as pd
-from pathlib import Path
-
-
-import os # Add this at the top of the file
-
-def __init__(self, file_path: str = 'test_logs/daily_telemetry.csv'):
-    self.base_url = "https://geocoding-api.open-meteo.com/v1/search"
-    self.weather_url = "https://api.open-meteo.com/v1/forecast"
-    self.file_path = file_path # Store the path for later use
-    
-    # SAFETY CHECK: Only read the file if it actually exists
-    if os.path.exists(file_path):
-        self.df = pd.read_csv(file_path)
-        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
-    else:
-        # Create an empty 'Data Bus' so the code doesn't crash on start
-        self.df = pd.DataFrame(columns=["timestamp", "location_id", "temp_c", "humidity_pct", "wind_kph", "condition"])
-    
-    self.storage = TelemetryStorageEngine()
-    logging.info("✅ WeatherBackend initialized and safety-checked.")
-
-
-# Then add this class INSIDE your WeatherBackend class or as a separate integration
+import os
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-class WeatherProcessor:
-    #Weather monitoring backend - uses Open-Meteo API
+class TelemetryStorageEngine:
+    """Mock storage engine - replace with your actual implementation"""
+    def __init__(self):
+        pass
     
-    def __init__(self, file_path: str = None):
-        self.base_url = "https://geocoding-api.open-meteo.com/v1/search"  # For city search
-        self.weather_url = "https://api.open-meteo.com/v1/forecast"        # For weather data
+    def log_reading(self, data: Dict) -> bool:
+        """Mock save function"""
+        try:
+            # In real implementation, you'd save to CSV/database here
+            logging.info(f"📊 Saved weather data for {data.get('location_id', 'unknown')}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to save: {e}")
+            return False
 
-         # Load the 'Bus' (Data) into RAM
-        self.df = pd.read_csv(file_path)
-    # Convert timestamp to a format the computer understands
-        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+class WeatherProcessor:
+    """Weather monitoring backend - uses Open-Meteo API"""
     
-        # Create the storage engine
+    def __init__(self, file_path: str = 'test_logs/daily_telemetry.csv'):
+        self.base_url = "https://geocoding-api.open-meteo.com/v1/search"
+        self.weather_url = "https://api.open-meteo.com/v1/forecast"
+        self.file_path = file_path
+        
+        # SAFELY load the CSV file
+        if os.path.exists(file_path):
+            self.df = pd.read_csv(file_path)
+            self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        else:
+            # Create empty DataFrame if file doesn't exist
+            self.df = pd.DataFrame(columns=[
+                "timestamp", "location_id", "temp_c", "humidity_pct", 
+                "wind_kph", "condition", "pressure_hpa"
+            ])
+            logging.warning(f"⚠️ File {file_path} not found. Created empty DataFrame.")
+        
         self.storage = TelemetryStorageEngine()
         logging.info("✅ WeatherBackend initialized with Open-Meteo (free API)")
 
-    # ============ Helper: Find City Coordinates ============
-    #For 1st feature 
     def _find_city_coordinates(self, city: str) -> Dict:
-        """
-        Convert city name to latitude and longitude
-        Open-Meteo needs coordinates, not city names
-        """
+        """Convert city name to latitude and longitude"""
         params = {
             'name': city,
             'count': 1,
@@ -78,7 +72,6 @@ class WeatherProcessor:
             if not data.get('results'):
                 return {'success': False, 'error': f"City '{city}' not found"}
             
-            # Get the first result
             result = data['results'][0]
             
             return {
@@ -93,12 +86,9 @@ class WeatherProcessor:
             return {'success': False, 'error': "Network error - check internet"}
         except Exception as e:
             return {'success': False, 'error': f"Error: {str(e)}"}
-    #For 2nd feature
+
     def description(self, weather_code: int) -> str:
-        """
-        Convert WMO weather codes to human-readable descriptions
-        Based on WMO code standards
-        """
+        """Convert WMO weather codes to human-readable descriptions"""
         weather_codes = {
             0: "Clear sky",
             1: "Mainly clear",
@@ -131,120 +121,26 @@ class WeatherProcessor:
         }
         
         return weather_codes.get(weather_code, f"Unknown ({weather_code})")
-    #for saving data in a folder 
+
     def _save_weather_data(self, weather_data: Dict) -> None:
-        """
-        Internal function to save weather data to CSV
-        This matches the format your friend's storage expects
-        """
-        # Format data for the storage engine
+        """Save weather data to CSV using storage engine"""
         telemetry_data = {
             'location_id': f"{weather_data['city']}, {weather_data['country']}",
             'temp_c': weather_data['temperature'],
             'humidity_pct': weather_data['humidity'],
-            'wind_kph': weather_data['wind_speed'] * 3.6,  # Convert m/s to km/h
+            'wind_kph': weather_data['wind_speed'] * 3.6,
             'condition': weather_data['condition']
         }
         
-        # Add pressure if available
-        if weather_data['pressure'] != 'N/A':
+        if weather_data.get('pressure') != 'N/A':
             telemetry_data['pressure_hpa'] = weather_data['pressure']
         
-        # Save it!
         success = self.storage.log_reading(telemetry_data)
         if success:
             logging.info(f"📊 Saved weather data for {weather_data['city']}")
-        else:
-            logging.warning(f"⚠️ Failed to save weather data for {weather_data['city']}")
-    #Dont need display functions once we have UI/UX
-    def display_weather(self, city: str) -> None:
-        """
-        Display weather in a nice readable format
-        This is the "show to user" function
-        """
-        print("\n" + "=" * 50)
-        print(f"🌤️  WEATHER REPORT: {city.upper()}")
-        print("=" * 50)
-        
-        result = self.get_current_weather(city)
-        
-        if result['success']:
-            # Show all the weather data
-            print(f"📍 Location: {result['city']}, {result['country']}")
-            print(f"🌡️  Temperature: {result['temperature']}°C")
-            print(f"🤔 Feels like: {result['feels_like']}°C")
-            print(f"💧 Humidity: {result['humidity']}%")
-            
-            if result['pressure'] != 'N/A':
-                print(f"📊 Pressure: {result['pressure']} hPa")
-            else:
-                print(f"📊 Pressure: Not available")
-                
-            print(f"☁️  Condition: {result['condition']}")
-            print(f"💨 Wind Speed: {result['wind_speed']} m/s ({result['wind_speed'] * 3.6:.1f} km/h)")
-            print(f"🕐 Time: {result['timestamp']}")
-        else:
-            print(f"❌ Error: {result['error']}")
-        
-        print("=" * 50)
-       
-    def display_comparison(self, city1: str, city2: str) -> None:
-        """
-        Display comparison in a nice readable format
-        """
-        print("\n" + "=" * 60)
-        print(f"🆚 WEATHER COMPARISON: {city1.upper()} vs {city2.upper()}")
-        print("=" * 60)
-        
-        result = self.compare_cities(city1, city2)
-        
-        if not result['success']:
-            print(f"❌ {result['error']}")
-            return
-        
-        # Show side-by-side comparison
-        c1 = result['city1']
-        c2 = result['city2']
-        comp = result['comparison']
-        
-        # Table format
-        print(f"\n{'Metric':<20} {c1['name']:<20} {c2['name']:<20}")
-        print("-" * 60)
-        print(f"{'Temperature':<20} {c1['temp']:>6}°C{' ':<12} {c2['temp']:>6}°C")
-        print(f"{'Humidity':<20} {c1['humidity']:>6}%{' ':<12} {c2['humidity']:>6}%")
-        
-        # Handle pressure display
-        pressure1_str = f"{c1['pressure']:.0f}hPa" if c1['pressure'] != 'N/A' else 'N/A'
-        pressure2_str = f"{c2['pressure']:.0f}hPa" if c2['pressure'] != 'N/A' else 'N/A'
-        print(f"{'Pressure':<20} {pressure1_str:>10}{' ':<8} {pressure2_str:>10}")
-        
-        print(f"{'Condition':<20} {c1['condition']:<20} {c2['condition']:<20}")
-        
-        # Show differences
-        print("\n" + "=" * 60)
-        print("📊 COMPARISON SUMMARY")
-        print("=" * 60)
-        
-        print(f"🔥 {comp['warmer_city']} is warmer by {comp['temperature_gap']:.1f}°C")
-        print(f"💧 {comp['more_humid_city']} is more humid by {comp['humidity_gap']:.1f}%")
-        
-        if comp['pressure_difference']:
-            if comp['pressure_difference'] > 0:
-                print(f"📊 {c1['name']} has higher pressure by {abs(comp['pressure_difference']):.0f} hPa")
-            else:
-                print(f"📊 {c2['name']} has higher pressure by {abs(comp['pressure_difference']):.0f} hPa")
-        
-        print("=" * 60)
-    #Dont need display functions once we have UI/UX
 
-
-    # ============ FEATURE 1: Get Weather ============
     def get_current_weather(self, city: str) -> Dict:
-        """
-        Fetch current weather for ONE city using Open-Meteo
-        Returns: Dictionary with weather data or error
-        """
-        # Step 1: Find city coordinates
+        """Fetch current weather for ONE city using Open-Meteo"""
         location = self._find_city_coordinates(city)
         
         if not location['success']:
@@ -253,7 +149,6 @@ class WeatherProcessor:
                 'error': location['error']
             }
         
-        # Step 2: Get weather using coordinates
         params = {
             'latitude': location['latitude'],
             'longitude': location['longitude'],
@@ -268,10 +163,8 @@ class WeatherProcessor:
             data = response.json()
             current = data['current']
             
-            #Convert weather code to description
             weather_description = self.description(current['weather_code'])
             
-            #Build weather info
             weather_info = {
                 'success': True,
                 'city': location['name'],
@@ -279,44 +172,26 @@ class WeatherProcessor:
                 'temperature': current['temperature_2m'],
                 'feels_like': current['apparent_temperature'],
                 'humidity': current['relative_humidity_2m'],
-                'pressure': current.get('pressure_msl', 'N/A'),  # Some locations may not have pressure
+                'pressure': current.get('pressure_msl', 'N/A'),
                 'condition': weather_description,
                 'wind_speed': current['wind_speed_10m'],
                 'timestamp': datetime.now().isoformat()
             }
             
-            # 🆕 SAVE to CSV using friend's storage engine
             self._save_weather_data(weather_info)
-            
             return weather_info
             
-        except requests.exceptions.ConnectionError:
-            return {
-                'success': False,
-                'error': "Network error - please check your internet connection"
-            }
-        except requests.exceptions.Timeout:
-            return {
-                'success': False,
-                'error': "Request timed out - API took too long to respond"
-            }
         except Exception as e:
             return {
                 'success': False,
                 'error': f"Unexpected error: {str(e)}"
             }
-    
-    # ============ FEATURE 2: Compare Two Cities ============
+
     def compare_cities(self, city1: str, city2: str) -> Dict:
-        """
-        Compare weather between two cities
-        Returns comparison dictionary
-        """
-        # Get weather for both cities
+        """Compare weather between two cities"""
         weather1 = self.get_current_weather(city1)
         weather2 = self.get_current_weather(city2)
         
-        # Check if both succeeded
         if not weather1['success']:
             return {
                 'success': False,
@@ -329,22 +204,15 @@ class WeatherProcessor:
                 'error': f"Couldn't get data for {city2}: {weather2['error']}"
             }
         
-        # Calculate comparisons
         temp_diff = weather1['temperature'] - weather2['temperature']
         humidity_diff = weather1['humidity'] - weather2['humidity']
         
-        # Handle pressure (if available)
         pressure1 = weather1['pressure'] if weather1['pressure'] != 'N/A' else None
         pressure2 = weather2['pressure'] if weather2['pressure'] != 'N/A' else None
         pressure_diff = pressure1 - pressure2 if (pressure1 and pressure2) else None
         
-        # Determine which is warmer
-        warmer = city1 if temp_diff > 0 else city2
-        temp_diff_abs = abs(temp_diff)
-        
-        # Determine which is more humid
-        more_humid = city1 if humidity_diff > 0 else city2
-        humidity_diff_abs = abs(humidity_diff)
+        warmer = weather1['city'] if temp_diff > 0 else weather2['city']
+        more_humid = weather1['city'] if humidity_diff > 0 else weather2['city']
         
         return {
             'success': True,
@@ -363,30 +231,30 @@ class WeatherProcessor:
                 'condition': weather2['condition']
             },
             'comparison': {
-                'temperature_difference': temp_diff,
                 'warmer_city': warmer,
-                'temperature_gap': temp_diff_abs,
-                'humidity_difference': humidity_diff,
+                'temperature_gap': abs(temp_diff),
                 'more_humid_city': more_humid,
-                'humidity_gap': humidity_diff_abs,
+                'humidity_gap': abs(humidity_diff),
                 'pressure_difference': pressure_diff
             }
         }
 
-    #============FEATURE 3: ============
     def find_extremes(self):
-        """Task: Show hottest/coldest day from stored data."""
-        # PEAK DETECTION: Find the address (index) of the Max/Min values
-        h_idx = self.df['temp_c'].idxmax()
-        c_idx = self.df['temp_c'].idxmin()
-
-        hottest = self.df.iloc[h_idx]
-        coldest = self.df.iloc[c_idx]
-
+        """Show hottest/coldest day from stored data."""
+        if len(self.df) == 0:
+            print("No data available for extreme analysis")
+            return {'success': False, 'error': 'No data available'}
+        
+        hottest_idx = self.df['temp_c'].idxmax()
+        coldest_idx = self.df['temp_c'].idxmin()
+        
+        hottest = self.df.iloc[hottest_idx]
+        coldest = self.df.iloc[coldest_idx]
+        
         print("--- PEAK DETECTION (Extremes) ---")
-        print(f"Hottest: {hottest['temp_c']}°C at {hottest['timestamp']}")
-        print(f"Coldest: {coldest['temp_c']}°C at {coldest['timestamp']}\n")
-
+        print(f"Hottest: {hottest['temp_c']}°C at {hottest['timestamp']} ({hottest['location_id']})")
+        print(f"Coldest: {coldest['temp_c']}°C at {coldest['timestamp']} ({coldest['location_id']})\n")
+        
         return {
             'success': True,
             'hottest': {
@@ -401,37 +269,26 @@ class WeatherProcessor:
             }
         }
 
-    #============FEATURE 4: ============
-    def calculate_trends(self, limit:int = 5):
-        """Task: Weather trend analysis."""
-        # DISCRETE DERIVATIVE: Calculate Delta Temp between readings
-        self.df['temp_slope'] = self.df['temp_c'].diff()
-
-        # SIGNAL SMOOTHING: 3-hour moving average to remove 'noise'
-        self.df['smooth_signal'] = self.df['temp_c'].rolling(window=3).mean()
-
-        print("--- TREND ANALYSIS (Last 5 Samples) ---")
-        # Showing the Timestamp, Temp, the Slope, and the Smoothed Signal
-        print(self.df[['timestamp', 'temp_c', 'temp_slope', 'smooth_signal']].tail())
-
-
-        # Check if we have data
-        if self.df is None or len(self.df) < 2:
+    def calculate_trends(self, limit: int = 5):
+        """Weather trend analysis."""
+        if len(self.df) < 2:
+            print("Not enough data for trend analysis")
             return {
                 'success': False,
                 'error': 'Not enough data for trend analysis'
             }
         
-        try:
-            last_entries = self.df.tail(limit)
-        except Exception as e:
-            return {
-                'success': False,
-                'error': f'Error accessing data: {str(e)}'
-            }
-            
-        # Build list of trends for UI
+        # Create a copy to avoid modifying original
+        df_copy = self.df.copy()
+        df_copy['temp_slope'] = df_copy['temp_c'].diff()
+        df_copy['smooth_signal'] = df_copy['temp_c'].rolling(window=min(3, len(df_copy))).mean()
+        
+        print("--- TREND ANALYSIS ---")
+        print(df_copy[['timestamp', 'temp_c', 'temp_slope', 'smooth_signal']].tail(limit))
+        
+        last_entries = df_copy.tail(limit)
         trends = []
+        
         for _, row in last_entries.iterrows():
             trends.append({
                 'timestamp': str(row['timestamp']),
@@ -439,23 +296,23 @@ class WeatherProcessor:
                 'slope': float(row['temp_slope']) if not pd.isna(row['temp_slope']) else 0,
                 'smooth_signal': float(row['smooth_signal']) if not pd.isna(row['smooth_signal']) else float(row['temp_c'])
             })
-
-            if len(trends) >= 2:
-                first_temp = trends[0]['temperature']
-                last_temp = trends[-1]['temperature']
-                overall_change = last_temp - first_temp
-                
-                if overall_change > 0:
-                    overall_trend = 'increasing'
-                elif overall_change < 0:
-                    overall_trend = 'decreasing'
-                else:
-                    overall_trend = 'stable'
+        
+        # Calculate overall trend
+        if len(trends) >= 2:
+            first_temp = trends[0]['temperature']
+            last_temp = trends[-1]['temperature']
+            overall_change = last_temp - first_temp
+            
+            if overall_change > 0:
+                overall_trend = 'increasing'
+            elif overall_change < 0:
+                overall_trend = 'decreasing'
+            else:
+                overall_trend = 'stable'
         else:
             overall_trend = 'insufficient_data'
             overall_change = 0
         
-        # Return data for UI
         return {
             'success': True,
             'trends': trends,
@@ -465,51 +322,72 @@ class WeatherProcessor:
             'last_updated': str(self.df['timestamp'].max()) if len(self.df) > 0 else None
         }
 
-
-
-# ============ TEST YOUR CODE ============
-#Dont need mainMenu and Input Function once we have UI/UX
-def mainMenu():
-        print("1.Show Weather Report:")
-        print("2.Compare two cities weather report")
-        print("3.Show hottest/coldest day from stored data")
-        print("4.Weather trend analysis ")
-        print("5.END")
-        choose = int(input("Choose between 1-4"))
-        return choose
-
-def INPUT():
-        while True:
-            choose = mainMenu()
-            if(choose == 1):
-                City1 = input("Enter City name")
-                City1 = City1.strip()
-                if City1:
-                    # Test Feature 1: Display weather
-                    print("\n📋 TEST 1: Display Weather")
-                    print("-" * 30)
-                    processor.display_weather(City1)
-            if(choose == 2):
-                City2 = input("Enter first City to compare")
-                City2 = City2.strip()
-                City3 = input("Enter other City to compare")
-                City3 = City3.strip()
-                    
-                if City2 and City3:
-                        # Test Feature 2: Compare cities
-                    print("\n📋 TEST 2: Compare Cities")
-                    print("-" * 30)
-                    processor.display_comparison(City2,City3)
-            if(choose == 3):
-                processor.find_extremes()
-            if(choose == 4):
-                x = int(input("How many trends"))
-                processor.calculate_trends(limit=x)
-            if(choose == 5):
-                break
-if __name__ == "__main__":
-    # Power on the processor
+def main():
+    """Main menu function"""
     processor = WeatherProcessor('test_logs/daily_telemetry.csv')
-    print("\n" + "🎯 WEATHER BACKEND TEST (Open-Meteo - FREE)".center(60))
-    print("=" * 60)
-    INPUT()
+    
+    while True:
+        print("\n" + "=" * 60)
+        print("🎯 WEATHER MONITORING SYSTEM")
+        print("=" * 60)
+        print("1. Show Weather Report")
+        print("2. Compare Two Cities")
+        print("3. Show Hottest/Coldest Days")
+        print("4. Weather Trend Analysis")
+        print("5. Exit")
+        print("-" * 60)
+        
+        try:
+            choice = int(input("Choose an option (1-5): "))
+            
+            if choice == 1:
+                city = input("Enter city name: ").strip()
+                if city:
+                    result = processor.get_current_weather(city)
+                    if result['success']:
+                        print(f"\n📍 {result['city']}, {result['country']}")
+                        print(f"🌡️ Temperature: {result['temperature']}°C")
+                        print(f"💧 Humidity: {result['humidity']}%")
+                        print(f"☁️ Condition: {result['condition']}")
+                    else:
+                        print(f"❌ Error: {result['error']}")
+                else:
+                    print("❌ Please enter a valid city name")
+                    
+            elif choice == 2:
+                city1 = input("Enter first city: ").strip()
+                city2 = input("Enter second city: ").strip()
+                if city1 and city2:
+                    result = processor.compare_cities(city1, city2)
+                    if result['success']:
+                        print(f"\n🆚 COMPARISON: {city1.upper()} vs {city2.upper()}")
+                        print(f"📍 {result['city1']['name']}: {result['city1']['temp']}°C")
+                        print(f"📍 {result['city2']['name']}: {result['city2']['temp']}°C")
+                        print(f"🔥 {result['comparison']['warmer_city']} is warmer by {result['comparison']['temperature_gap']:.1f}°C")
+                    else:
+                        print(f"❌ Error: {result['error']}")
+                else:
+                    print("❌ Please enter valid city names")
+                    
+            elif choice == 3:
+                processor.find_extremes()
+                
+            elif choice == 4:
+                try:
+                    limit = int(input("How many trend entries to show? (default 5): ") or 5)
+                    processor.calculate_trends(limit=limit)
+                except ValueError:
+                    print("❌ Please enter a valid number")
+                    
+            elif choice == 5:
+                print("👋 Goodbye!")
+                break
+                
+            else:
+                print("❌ Invalid choice. Please enter 1-5")
+                
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+if __name__ == "__main__":
+    main()
