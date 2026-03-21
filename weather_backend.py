@@ -12,6 +12,26 @@ from telemetry_storage_engine import TelemetryStorageEngine
 import pandas as pd
 from pathlib import Path
 
+
+import os # Add this at the top of the file
+
+def __init__(self, file_path: str = 'test_logs/daily_telemetry.csv'):
+    self.base_url = "https://geocoding-api.open-meteo.com/v1/search"
+    self.weather_url = "https://api.open-meteo.com/v1/forecast"
+    self.file_path = file_path # Store the path for later use
+    
+    # SAFETY CHECK: Only read the file if it actually exists
+    if os.path.exists(file_path):
+        self.df = pd.read_csv(file_path)
+        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+    else:
+        # Create an empty 'Data Bus' so the code doesn't crash on start
+        self.df = pd.DataFrame(columns=["timestamp", "location_id", "temp_c", "humidity_pct", "wind_kph", "condition"])
+    
+    self.storage = TelemetryStorageEngine()
+    logging.info("✅ WeatherBackend initialized and safety-checked.")
+
+
 # Then add this class INSIDE your WeatherBackend class or as a separate integration
 
 # Setup logging
