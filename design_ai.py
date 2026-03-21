@@ -1,5 +1,8 @@
+#asked ai to add comments to understand the design and stuff and the code is same as the mock.py file
+
+
 """
-weather_frontend.py
+
 ═══════════════════════════════════════════════════════════════════════════════
 FRONTEND LAYER — PySide6 Weather Application
 ─────────────────────────────────────────────
