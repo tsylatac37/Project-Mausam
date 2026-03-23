@@ -1,8 +1,8 @@
-#asked ai to add comments to understand the design and stuff and the code is same as the mock.py file
+#asked ai to add comments to understand it well......and i added a splash window to this check it cout later
 
 
 """
-
+weather_frontend.py
 ═══════════════════════════════════════════════════════════════════════════════
 FRONTEND LAYER — PySide6 Weather Application
 ─────────────────────────────────────────────
@@ -1390,10 +1390,188 @@ class MainWindow(QMainWindow):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  SPLASH SCREEN
+#  Shown first when the app launches. Clicking "Get Started" opens MainWindow.
+# ═══════════════════════════════════════════════════════════════════════════════
+class SplashBg(QWidget):
+    """
+    Animated warm sunset background for the splash screen.
+
+    Draws a gradient that shifts between deep purple, warm rose, and
+    soft amber — mimicking the golden-hour cloudy sky in the design.
+    Two soft radial blobs drift slowly to add depth, similar to Aurora
+    but in warm tones instead of cool blues.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._t = 0.0
+        t = QTimer(self)
+        t.timeout.connect(self._tick)
+        t.start(50)   # 20 fps — same rhythm as Aurora
+
+    def _tick(self):
+        self._t += 0.5
+        self.update()
+
+    def paintEvent(self, e):
+        import math
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        w, h = self.width(), self.height()
+
+        # ── base sunset gradient (top: deep purple → mid: rose → bottom: amber)
+        base = QLinearGradient(0, 0, 0, h)
+        base.setColorAt(0.00, QColor(72,  40,  90))   # deep purple top
+        base.setColorAt(0.35, QColor(160,  70,  90))  # dusty rose
+        base.setColorAt(0.65, QColor(210, 110,  70))  # warm orange
+        base.setColorAt(1.00, QColor(180,  80,  60))  # burnt sienna bottom
+        p.fillRect(self.rect(), base)
+
+        # ── blob 1: golden glow, drifts upper-centre ──────────────────────────
+        bx = w * 0.55 + math.sin(math.radians(self._t * 0.4)) * 80
+        by = h * 0.25 + math.cos(math.radians(self._t * 0.3)) * 40
+        g  = QRadialGradient(bx, by, 420)
+        g.setColorAt(0.00, QColor(240, 160,  60, 55))
+        g.setColorAt(0.50, QColor(200, 100,  50, 22))
+        g.setColorAt(1.00, QColor(0,     0,   0,  0))
+        pp = QPainterPath()
+        pp.addEllipse(bx - 420, by - 300, 840, 600)
+        p.fillPath(pp, g)
+
+        # ── blob 2: soft pink, drifts lower-left ──────────────────────────────
+        bx2 = w * 0.25 + math.cos(math.radians(self._t * 0.35)) * 70
+        by2 = h * 0.70 + math.sin(math.radians(self._t * 0.28)) * 50
+        g2  = QRadialGradient(bx2, by2, 320)
+        g2.setColorAt(0.00, QColor(180,  80, 120, 45))
+        g2.setColorAt(0.55, QColor(130,  50,  90, 18))
+        g2.setColorAt(1.00, QColor(0,     0,   0,  0))
+        pp2 = QPainterPath()
+        pp2.addEllipse(bx2 - 320, by2 - 240, 640, 480)
+        p.fillPath(pp2, g2)
+
+        # ── soft vignette overlay (darkens edges for depth) ───────────────────
+        vig = QRadialGradient(w / 2, h / 2, max(w, h) * 0.75)
+        vig.setColorAt(0.0, QColor(0, 0, 0,   0))
+        vig.setColorAt(1.0, QColor(0, 0, 0,  90))
+        pp3 = QPainterPath()
+        pp3.addRect(0, 0, w, h)
+        p.fillPath(pp3, vig)
+
+
+class SplashScreen(QMainWindow):
+    """
+    Welcome screen shown before the main app.
+
+    Layout (vertically centred over the sunset background):
+      • App name  "Mausam"  in large elegant serif
+      • Tagline subtitle
+      • "Get Started" button  → hides splash, opens MainWindow
+
+    The name "Mausam" means "weather" / "season" in Hindi/Urdu.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Mausam")
+        self.setMinimumSize(860, 500)
+        self.setFixedSize(860, 500)   # splash is fixed size — not resizable
+
+        # ── background ────────────────────────────────────────────────────────
+        bg = SplashBg()
+        self.setCentralWidget(bg)
+
+        # ── content layer centred over the background ─────────────────────────
+        outer = QVBoxLayout(bg)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addStretch(2)   # push content toward vertical centre
+
+        # ── App name ──────────────────────────────────────────────────────────
+        name = QLabel("Mausam")
+        name_font = QFont("Georgia", 58)   # serif — elegant, close to the design
+        name_font.setBold(True)
+        name_font.setItalic(True)
+        name.setFont(name_font)
+        name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        name.setStyleSheet("""
+            color: white;
+            background: transparent;
+            letter-spacing: 3px;
+        """)
+        outer.addWidget(name)
+
+        outer.addSpacing(18)
+
+        # ── Tagline ───────────────────────────────────────────────────────────
+        tagline = QLabel(
+            "Welcome to Mausam — a platform to get the real-time\n"
+            "weather updates of any location of your choice, anytime!"
+        )
+        tag_font = QFont("Georgia", 12)
+        tagline.setFont(tag_font)
+        tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        tagline.setStyleSheet("""
+            color: rgba(255, 240, 230, 210);
+            background: transparent;
+            line-height: 1.6;
+        """)
+        outer.addWidget(tagline)
+
+        outer.addSpacing(42)
+
+        # ── Get Started button ────────────────────────────────────────────────
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        self.btn = QPushButton("Get Started")
+        self.btn.setFixedSize(160, 44)
+        self.btn.setFont(QFont("Georgia", 12))
+        self.btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(40, 30, 60, 200);
+                color: white;
+                border: 1.5px solid rgba(255, 255, 255, 80);
+                border-radius: 6px;
+                letter-spacing: 1px;
+            }
+            QPushButton:hover {
+                background: rgba(60, 45, 85, 220);
+                border: 1.5px solid rgba(255, 255, 255, 140);
+            }
+            QPushButton:pressed {
+                background: rgba(25, 18, 45, 220);
+            }
+        """)
+        self.btn.clicked.connect(self._launch)
+        btn_row.addWidget(self.btn)
+        btn_row.addStretch()
+        outer.addLayout(btn_row)
+
+        outer.addStretch(3)   # slightly more space below for visual balance
+
+        # ── subtle footer ─────────────────────────────────────────────────────
+        footer = QLabel("Real-time weather · Trends · History · Compare")
+        footer.setFont(QFont("Segoe UI", 8))
+        footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        footer.setStyleSheet("color: rgba(255,220,200,100); background:transparent;")
+        outer.addWidget(footer)
+        outer.addSpacing(14)
+
+    def _launch(self):
+        """
+        Called when the user clicks Get Started.
+        Opens the main weather app window and closes the splash.
+        """
+        self._main = MainWindow()   # keep a reference so it isn't garbage collected
+        self._main.show()
+        self.close()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════════
 app = QApplication(sys.argv)
 app.setStyle("Fusion")
-w = MainWindow()
-w.show()
+splash = SplashScreen()
+splash.show()
 sys.exit(app.exec())
