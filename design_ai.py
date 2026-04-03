@@ -1,6 +1,4 @@
-#asked ai to add comments to understand it well......and i added a splash window to this check it cout later
-
-
+# Comments are added where necessary to understand the code in a better way
 """
 weather_frontend.py
 ═══════════════════════════════════════════════════════════════════════════════
@@ -43,7 +41,6 @@ DEPENDENCIES
 
 import sys
 from datetime import datetime
-
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                                QHBoxLayout, QGridLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QFrame, QTabWidget,
@@ -52,13 +49,11 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PySide6.QtCore    import Qt, QTimer
 from PySide6.QtGui     import (QPainter, QColor, QFont, QLinearGradient,
                                 QPen, QPainterPath, QRadialGradient)
-
 import matplotlib
 matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PALETTE
@@ -75,7 +70,6 @@ DANGER    = "#ef5350"                 # red                    — error / extre
 WARN      = "#ffb74d"                 # amber                  — warnings / sunrise
 FONT      = "Segoe UI"               # global font family
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DESIGN PRIMITIVES
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -89,7 +83,6 @@ def L(text="", size=12, bold=False, color=TXT_PRI,
     l.setAlignment(align)
     l.setStyleSheet(f"color:{color}; background:transparent;")
     return l
-
 
 class Frost(QWidget):
     def __init__(self, parent=None, r=18, glow=False):
@@ -124,7 +117,6 @@ class Frost(QWidget):
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawPath(gp)
 
-
 SS = (
     f"QLineEdit{{background:rgba(6,16,34,210);"
     f"border:1px solid rgba(90,170,255,38);border-radius:12px;"
@@ -150,7 +142,6 @@ CSS = (
     f"selection-background-color:rgba(79,195,247,28);}}"
 )
 
-
 class Pill(Frost):
     def __init__(self, emoji, label, value):
         super().__init__(r=14)
@@ -172,7 +163,6 @@ class Pill(Frost):
     def set(self, v):
         self._v.setText(v)
 
-
 class HChip(Frost):
     def __init__(self, time, icon, temp):
         super().__init__(r=14)
@@ -189,7 +179,6 @@ class HChip(Frost):
         lay.addWidget(ic)
         lay.addWidget(L(f"{temp}°", 11, bold=True,
                         align=Qt.AlignmentFlag.AlignCenter))
-
 
 class FRow(Frost):
     def __init__(self, day, icon, high, low, rain):
@@ -218,7 +207,6 @@ class FRow(Frost):
         lay.addSpacing(6)
         lay.addWidget(L(f"{high}°", 13, bold=True,
                         align=Qt.AlignmentFlag.AlignRight))
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  AURORA BACKGROUND
@@ -272,11 +260,9 @@ class Aurora(QWidget):
         for _ in range(55):
             p.drawPoint(rng.randint(0, w), rng.randint(0, h))
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TAB 1 — CURRENT WEATHER
 # ═══════════════════════════════════════════════════════════════════════════════
-
 class CurrentTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -546,7 +532,6 @@ class CurrentTab(QWidget):
             traceback.print_exc()
             self.show_error(f"Error: {e}")
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TAB 2 — COMPARE
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -699,7 +684,6 @@ class CompareTab(QWidget):
         )
         self.banner.show()
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TAB 3 — HISTORY
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -834,7 +818,6 @@ class HistoryTab(QWidget):
                 ])
         QMessageBox.information(self, "Done", f"Saved:\n{path}")
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TAB 4 — TRENDS
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -951,7 +934,6 @@ class TrendsTab(QWidget):
         self.pmn.set(f"{min(values):.1f}{unit}")
         self.pt.set(trend)
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN WINDOW
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -960,7 +942,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Weather Forecast")
         self.setMinimumSize(800, 700)
-
 
         bg = Aurora()
         self.setCentralWidget(bg)
@@ -996,7 +977,6 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.tcm, "🔀  Compare")
         tabs.addTab(self.th,  "📋  History")
         tabs.addTab(self.tt,  "📈  Trends")
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SPLASH SCREEN
@@ -1052,7 +1032,6 @@ class SplashBg(QWidget):
         pp3 = QPainterPath()
         pp3.addRect(0, 0, w, h)
         p.fillPath(pp3, vig)
-
 
 class SplashScreen(QMainWindow):
     def __init__(self):
@@ -1140,11 +1119,9 @@ class SplashScreen(QMainWindow):
         self._main.show()
         self.close()
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════════
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
