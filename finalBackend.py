@@ -32,7 +32,7 @@ def _load_df(file_path: str) -> pd.DataFrame:
 
 # ============ TELEMETRY STORAGE ENGINE ============
 class TelemetryStorageEngine:
-    def __init__(self, file_path: str = 'test_logs/daily_telemetry.csv'):
+    def __init__(self, file_path: str = 'telemetry_logs/daily_telemetry.csv'):
         self.file_path = file_path
         os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
         self.df = _load_df(file_path)
@@ -129,7 +129,7 @@ class TelemetryStorageEngine:
 
 # ============ WEATHER PROCESSOR ============
 class WeatherProcessor:
-    def __init__(self, file_path: str = 'test_logs/daily_telemetry.csv'):
+    def __init__(self, file_path: str = 'telemetry_logs/daily_telemetry.csv'):
         self.base_url    = "https://geocoding-api.open-meteo.com/v1/search"
         self.weather_url = "https://api.open-meteo.com/v1/forecast"
         self.file_path   = file_path
