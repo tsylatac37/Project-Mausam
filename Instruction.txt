@@ -30,8 +30,8 @@ Initial Setup
 Clone the repository to your local machine:
 Bash
 
-git clone https://github.com/tsylatac37/Weather-Telemetry-System.git
-cd Weather-Telemetry-System
+git clone https://github.com/tsylatac37/Project-Mausam.git
+cd Project-Mausam
 
 Daily Development Cycle
 Step 1: Update your local code
