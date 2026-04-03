@@ -1,4 +1,4 @@
-# Weather Telemetry System
+# Weather Telemetry System a.k.a Project Mausam
 
 **Python Telemetry Project | GITAM PPS-II (24CSEN1041)**
 
