@@ -122,10 +122,10 @@ This project implements practical demonstrations of the following concepts:
 
 | Member | Role |
 |--------|------|
-| [Member Name] | Lead Architect & Backend |
-| [Member Name] | GUI & Visualization |
-| [Member Name] | Documentation & Design |
-| [Member Name] | QA & Integration |
+| [Priyasmita G.] | Project Overseer & Report Writer (with GUI support) |
+| [G. Sai Satwik] | Lead GUI Designer |
+| [G. Tejaswini] | Connector (Backend - GUI Linking with API Integration) |
+| [Sai Prasad Padhy] | Backend Developer & Version Control Head |
 
 ---
 
