@@ -924,7 +924,7 @@ class TrendsTab(QWidget):
         ax.spines[:].set_visible(False)
         ax.yaxis.grid(True, color="#ffffff0c", zorder=0)
         ax.set_title(
-            f"{self.cc.currentText()} — {metric} (last {len(values)} days)",
+            f"{self.cc.currentText()} — {metric} (next {len(values)} days)",
             color=ACC, fontsize=10, pad=8)
         self.canvas.draw()
 
