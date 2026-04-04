@@ -1,210 +1,143 @@
-# Weather Telemetry System
+# Weather Telemetry System a.k.a Project Mausam
 
-```
-------------------------------------------------------------
- Python Telemetry Project | GITAM PPS-II (24CSEN1041)
-------------------------------------------------------------
-```
+**Python Telemetry Project | GITAM PPS-II (24CSEN1041)**
+
+---
 
 ## Overview
 
-The **Weather Telemetry System** is a Python-based application developed for the **GITAM PPS-II short-term project**.
-
-The system retrieves **real-time atmospheric data** using the **OpenWeatherMap API**, stores it locally for historical reference, and performs **basic trend analysis and visualization** of weather patterns.
-
-This project demonstrates practical implementation of:
-
-* API-based data acquisition
-* Data storage and processing
-* Weather trend analysis
-* GUI development
-* Data visualization
+The Weather Telemetry System is a Python-based application developed for the GITAM PPS-II short-term project (24CSEN1041). This project bridges a high-performance data engine with a modern Model-View-Controller (MVC) architecture, delivering real-time weather monitoring and analytics capabilities through an intuitive graphical interface. The system seamlessly integrates REST API communication, asynchronous data processing, and persistent storage mechanisms to provide a comprehensive telemetry solution for atmospheric data collection and analysis.
 
 ---
 
 ## Key Features
 
-### Real-Time Weather Monitoring
+- **Real-Time Weather Monitoring**: Fetches live atmospheric data using the Open-Meteo API, providing current weather conditions and forecasts without requiring API key configuration.
 
-Fetches live atmospheric data including:
+- **Data Persistence**: Implements a self-healing architecture that logs telemetry data locally to CSV format with robust error handling and automatic recovery mechanisms.
 
-* Temperature
-* Humidity
-* Atmospheric Pressure
-* Weather Conditions
+- **Weather Analytics**: Performs advanced data analysis by calculating temperature extremes, pressure trends, and atmospheric variations using discrete derivatives and statistical methods.
 
-### Data Persistence
+- **Interactive GUI**: Features a hardware-accelerated graphical user interface built with PySide6, delivering responsive and visually polished user interactions.
 
-* Logs daily weather reports
-* Stores historical data in **CSV format**
-* Enables long-term trend analysis
-
-### Weather Analytics
-
-Automatically calculates:
-
-* Hottest recorded day
-* Coldest recorded day
-* Temperature trends
-* Humidity trends
-
-### Interactive GUI (Advanced Component)
-
-A **Tkinter-based graphical interface** that allows users to:
-
-* Fetch live weather data
-* View stored historical records
-* Display visual charts
-
-### Data Visualization
-
-Dynamic charts generated using **Matplotlib** for:
-
-* Temperature trends
-* Humidity trends
-* Historical comparisons
+- **Data Visualization**: Generates dynamic, interactive charts using Matplotlib, enabling users to visualize temporal weather patterns and trends with ease.
 
 ---
 
 ## Technology Stack
 
-| Component | Technology                            |
-| --------- | ------------------------------------- |
-| Language  | Python 3.x                            |
-| API       | OpenWeatherMap                        |
-| Libraries | requests, pandas, matplotlib, tkinter |
-| Storage   | CSV / SQLite                          |
+| Component | Technology |
+|-----------|-----------|
+| **Language** | Python 3.x |
+| **API Integration** | Open-Meteo (Free, No API Key Required) |
+| **GUI Framework** | PySide6 |
+| **Data Processing** | pandas, numpy |
+| **Visualization** | Matplotlib |
+| **HTTP Client** | requests |
+| **Data Storage** | CSV (telemetry_logs/) |
 
 ---
 
 ## Project Structure
 
 ```
-weather-telemetry-system/
+Project-Mausam/
 │
-├── main.py              # Application entry point
-├── config.py            # API configuration
-├── data/                # Stored weather logs
-│   └── weather_log.csv
+├── run.py                          # Application entry point
+├── bridge.py                       # Controller & threading logic
+├── finalBackend.py                 # Data storage and API integration
+├── design_ai.py                    # PySide6 graphical interface
 │
-├── modules/
-│   ├── api_fetch.py     # API request handling
-│   ├── analytics.py     # Weather analysis logic
-│   ├── storage.py       # Data persistence
-│   └── visualization.py # Chart generation
+├── telemetry_logs/                 # Weather telemetry data storage
+│   └── *.csv                       # Timestamped weather logs
 │
-├── gui/
-│   └── app_gui.py       # Tkinter interface
-│
-└── README.md
+├── requirements.txt                # Python dependencies
+└── README.md                       # Project documentation
 ```
 
 ---
 
 ## Setup Instructions
 
-### 1. Clone the Repository
+### Prerequisites
 
-```bash
-git clone https://github.com/yourusername/weather-telemetry-system.git
-cd weather-telemetry-system
-```
+Ensure you have Python 3.8 or higher installed on your system.
 
-### 2. Create a Virtual Environment
+### Installation Steps
 
-```bash
-python -m venv venv
-```
+1. **Clone the Repository**
 
-Activate the environment.
+   ```bash
+   git clone https://github.com/tsylatac37/Project-Mausam.git
+   cd Project-Mausam
+   ```
 
-**Windows**
+2. **Create a Virtual Environment**
 
-```bash
-venv\Scripts\activate
-```
+   ```bash
+   # On Windows
+   python -m venv venv
+   venv\Scripts\activate
 
-**Linux / macOS**
+   # On macOS/Linux
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
 
-```bash
-source venv/bin/activate
-```
+3. **Install Dependencies**
 
-### 3. Install Dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-pip install requests pandas matplotlib
-```
+4. **Run the Application**
 
-### 4. Configure API Key
+   ```bash
+   python run.py
+   ```
 
-Create a file named **config.py** in the root directory.
+### Important Note
 
-```python
-API_KEY = "your_openweathermap_api_key"
-```
-
-You can obtain a free API key from:
-[https://openweathermap.org/api](https://openweathermap.org/api)
-
-### 5. Run the Application
-
-```bash
-python main.py
-```
-
----
-
-## Example Output
-
-```
----------------------------------------
- Weather Report
----------------------------------------
-Location: Visakhapatnam
-Temperature: 29.4 °C
-Humidity: 72 %
-Pressure: 1008 hPa
-Condition: Scattered Clouds
----------------------------------------
-```
+Unlike OpenWeatherMap and similar services, the Open-Meteo API **does NOT require API key configuration**. The application will automatically connect to the free Open-Meteo endpoints without additional authentication setup. This eliminates the overhead of credential management while maintaining reliable data access.
 
 ---
 
 ## Learning Objectives
 
-This project demonstrates practical implementation of:
+This project implements practical demonstrations of the following concepts:
 
-* REST API integration
-* Data collection pipelines
-* File-based data persistence
-* Data analysis using Pandas
-* GUI development with Tkinter
-* Data visualization using Matplotlib
+- **REST API Integration**: Demonstrates synchronous HTTP communication with third-party APIs using the `requests` library and proper error handling.
+
+- **Model-View-Controller (MVC) Architecture**: Separates business logic (Model), user interface (View), and control flow (Controller) into distinct, maintainable modules.
+
+- **Multi-threading in GUI Applications**: Implements asynchronous data fetching and processing in the GUI thread to prevent UI freezing and maintain responsiveness.
+
+- **Data Analysis using Pandas**: Performs statistical computations, data aggregation, filtering, and transformation on weather datasets.
+
+- **Data Visualization**: Creates dynamic, publication-quality charts and graphs that effectively communicate temporal weather patterns and analytical insights.
 
 ---
 
 ## Team Details
 
-```
-Lead Architect           : [Member Name]
-GUI & Visualization      : [Member Name]
-Documentation & Design   : [Member Name]
-QA & Media               : [Member Name]
-```
+| Member | Role |
+|--------|------|
+| [Member Name] | Lead Architect & Backend |
+| [Member Name] | GUI & Visualization |
+| [Member Name] | Documentation & Design |
+| [Member Name] | QA & Integration |
 
 ---
 
-## Evaluation Target
+## License
 
-```
-Expected Score: 10 / 10
+This project is developed as part of the GITAM PPS-II coursework (24CSEN1041) and is intended for educational purposes.
 
-Includes:
-- Core Functionality
-- API Integration
-- Data Storage
-- GUI Implementation
-- Visualization Bonus Marks
-```
+## Acknowledgments
 
+- **Open-Meteo**: Providing free, reliable weather data API
+- **GITAM University**: Supporting practical project-based learning
+
+---
+
+*Last Updated: April 2026*
